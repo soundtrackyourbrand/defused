@@ -17,7 +17,8 @@ defmodule Defused.Mixfile do
   end
 
   defp deps do
-    [{:fuse, "~> 2.4"}]
+    [{:fuse, "~> 2.4"},
+     {:ex_doc, "~> 0.16", only: :dev}]
   end
 
   defp package do
