@@ -1,0 +1,1 @@
+%{"fuse": {:git, "https://github.com/jlouis/fuse.git", "79f219d253b0ccd73060840ef400fc78edff856b", [ref: "79f219d253b0ccd73060840ef400fc78edff856b"]}}
