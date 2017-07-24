@@ -6,7 +6,7 @@ Provides a `defused/3` macro similar to `Kernel#def/2` but that wraps all calls 
 
 You first need to install a fuse, see [fuse source](https://github.com/jlouis/fuse)
 
-```
+```elixir
 defmodule MyModule do
   use Defused
 
