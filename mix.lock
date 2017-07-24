@@ -1,1 +1,1 @@
-%{"fuse": {:git, "https://github.com/jlouis/fuse.git", "79f219d253b0ccd73060840ef400fc78edff856b", [ref: "79f219d253b0ccd73060840ef400fc78edff856b"]}}
+%{"fuse": {:hex, :fuse, "2.4.0", "499ab65d3b1d291909973e1c25bdc55a17379fb26899f25eb68b6437a880de1b", [:make, :rebar], []}}

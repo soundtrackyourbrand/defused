@@ -17,7 +17,7 @@ defmodule Defused.Mixfile do
   end
 
   defp deps do
-    [{:fuse, git: "https://github.com/jlouis/fuse.git", ref: "79f219d253b0ccd73060840ef400fc78edff856b"}]
+    [{:fuse, "~> 2.4"}]
   end
 
   defp package do
