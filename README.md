@@ -1,5 +1,7 @@
 # Defused
 
+[![Build Status](https://travis-ci.org/soundtrackyourbrand/defused.svg?branch=master)](https://travis-ci.org/soundtrackyourbrand/defused)
+
 Provides a `defused/3` macro similar to `Kernel#def/2` but that wraps all calls to the provided function body in a call to the specified fuse that will check and blow the fuse as needed.
 
 # Usage
