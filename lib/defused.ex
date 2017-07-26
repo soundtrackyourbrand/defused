@@ -43,6 +43,8 @@ defmodule Defused do
 
   A defused function must return either `:ok` or `{:ok, _}`, otherwise
   the fuse will melt, and eventually blow.
+  
+  When the fuse is blown, the function will return `{:error, :unavailable}`
 
   """
   defmacro defused(fuse, call, do: block) do
