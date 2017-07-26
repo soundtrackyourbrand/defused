@@ -3,9 +3,7 @@ defmodule Defused do
   Provides a `defused/3` macro similar to `Kernel#def/2` but that wraps all
   calls to the provided function body in a call to the specified fuse that
   will check and blow the fuse as needed.
-  """
 
-  @doc """
   ## Examples
 
       use Defused
@@ -17,6 +15,7 @@ defmodule Defused do
       end
   """
 
+  @doc false
   defmacro __using__(_env) do
     quote do
       import unquote(__MODULE__), only: [defused: 3]
@@ -28,6 +27,24 @@ defmodule Defused do
     end
   end
 
+  @doc """
+  Defines a fused function with the given fuse name, function name
+  and body.
+
+  ## Examples
+
+      defmodule Foo do
+        defused :fuse, bar, do: :ok
+      end
+
+      Foo.bar #=> :ok
+
+  ## Returns
+
+  A defused function must return either `:ok` or `{:ok, _}`, otherwise
+  the fuse will melt, and eventually blow.
+
+  """
   defmacro defused(fuse, call, do: block) do
     quote do
       def unquote(call) do
