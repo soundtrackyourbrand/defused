@@ -3,14 +3,28 @@ defmodule Defused.Module do
     target = Keyword.fetch!(opts, :target)
     fuse = Keyword.fetch!(opts, :fuse)
 
+    only = Keyword.get(opts, :only, nil)
+    except = Keyword.get(opts, :except, nil)
+
     quote location: :keep,
           bind_quoted: [
             target: target,
-            fuse: fuse
+            fuse: fuse,
+            only: only,
+            except: except,
           ] do
 
       use Defused
+
       fns = target.__info__(:functions)
+      |> Enum.filter(fn
+        {f, a} when is_list(only) -> Keyword.get(only, f) == a
+        _ -> true
+      end)
+      |> Enum.reject(fn
+        {f, a} when is_list(except) -> Keyword.get(except, f) == a
+        _ -> false
+      end)
 
       Enum.map(fns, fn {name, arity} ->
         args = case arity do
