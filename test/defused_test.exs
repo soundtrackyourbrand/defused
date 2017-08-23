@@ -2,22 +2,44 @@ defmodule DefusedTest do
   use ExUnit.Case
   doctest Defused
 
-  use Defused
-
   @fuse :test_fuse
 
-  defused @fuse, func() do
-    :ok
+  defmodule DefusedTest do
+    @fuse :test_fuse
+    use Defused
+
+    defused @fuse, func() do
+      :ok
+    end
   end
 
-  :ok = :fuse.install(@fuse, {{:standard, 10, 50}, {:reset, 10_000}})
+  defmodule DefusedTestError do
+    @fuse :test_fuse
+    use Defused
+
+    defused @fuse, func() do
+      :ok
+    end
+
+    def blown_error(fuse, call) do
+      {:error, fuse, call}
+    end
+  end
+
+  setup_all do
+    :fuse.install(@fuse, {{:standard, 10, 50}, {:reset, 10_000}})
+  end
 
   test "executes body if fuse is not blown" do
     :ok = :fuse.circuit_enable(@fuse)
-    assert func() == :ok
+    assert DefusedTest.func() == :ok
   end
   test "return unavailable error if fuse is blown" do
     :ok = :fuse.circuit_disable(@fuse)
-    assert func() == {:error, :unavailable}
+    assert DefusedTest.func() == {:error, :unavailable}
+  end
+  test "blown error is overridable" do
+    :ok = :fuse.circuit_disable(@fuse)
+    assert DefusedTestError.func() == {:error, @fuse, [func: 0]}
   end
 end

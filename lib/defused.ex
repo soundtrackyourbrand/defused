@@ -24,6 +24,13 @@ defmodule Defused do
       # never matching :ok -> :ok
       # TODO: remove once not needed anymore.
       @dialyzer :no_match
+
+      @doc false
+      def blown_error(_fuse, _call) do
+        {:error, :unavailable}
+      end
+
+      defoverridable [blown_error: 2]
     end
   end
 
@@ -58,7 +65,7 @@ defmodule Defused do
                      :fuse.melt(unquote(fuse))
                      err
                  end
-          :blown -> {:error, :unavailable}
+          :blown -> blown_error(unquote(fuse), [__ENV__.function])
         end
       end
     end
