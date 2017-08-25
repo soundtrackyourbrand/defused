@@ -1,43 +1,61 @@
 defmodule Defused.Module do
   defmacro __using__(opts) do
-    target = Keyword.fetch!(opts, :target)
-    fuse = Keyword.fetch!(opts, :fuse)
+    quote do
+      fuse = Keyword.fetch!(unquote(opts), :fuse)
 
-    only = Keyword.get(opts, :only, nil)
-    except = Keyword.get(opts, :except, nil)
+      only = case Keyword.get(unquote(opts), :only, nil) do
+        nil -> nil
+        x -> MapSet.new(x)
+      end
 
-    quote location: :keep,
-          bind_quoted: [
-            target: target,
-            fuse: fuse,
-            only: only,
-            except: except,
-          ] do
+      except = case Keyword.get(unquote(opts), :except, nil) do
+        nil -> nil
+        x -> MapSet.new(x)
+      end
+
+      if only && except do
+        throw "Cannot specify both `only` and `except`"
+      end
 
       use Defused
+      import Kernel, except: [def: 2]
+      import Defused.Module
 
-      fns = target.__info__(:functions)
-      |> Enum.filter(fn
-        {f, a} when is_list(only) -> Keyword.get(only, f) == a
-        _ -> true
-      end)
-      |> Enum.reject(fn
-        {f, a} when is_list(except) -> Keyword.get(except, f) == a
-        _ -> false
-      end)
+      @defused_only only
+      @defused_except except
+    end
+  end
 
-      Enum.map(fns, fn {name, arity} ->
-        args = case arity do
-          0 -> []
-          n ->
-            1..arity
-            |> Enum.map(fn n -> Macro.var("var#{n}" |> String.to_atom, __MODULE__) end)
+  defp meta(call) do
+    case call do
+      {:when, _, [call | _]} -> meta(call)
+      {name, _, args} ->
+        arity = case args do
+          nil -> 0
+          args -> length(args)
         end
+        {name, arity}
+    end
+  end
 
-        defused unquote(fuse), unquote(name)(unquote_splicing(args)) do
-          unquote(target).unquote(name)(unquote_splicing(args))
-        end
-      end)
+  defmacro def(call, expr \\ nil) do
+    quote do
+      {name, arity} = unquote(meta(call))
+
+      cond do
+        {name, arity} == {:blown_error, 2} -> Kernel.def(unquote(call), unquote(expr))
+        @defused_only != nil ->
+          case MapSet.member?(@defused_only, {name, arity}) do
+            false -> Kernel.def(unquote(call), unquote(expr))
+            true -> defused @fuse, unquote(call), unquote(expr)
+          end
+        @defused_except != nil ->
+          case MapSet.member?(@defused_except, {name, arity}) do
+            true -> Kernel.def(unquote(call), unquote(expr))
+            false -> defused @fuse, unquote(call), unquote(expr)
+          end
+        true -> defused @fuse, unquote(call), unquote(expr)
+      end
     end
   end
 end
