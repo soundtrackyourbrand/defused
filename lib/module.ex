@@ -1,4 +1,31 @@
 defmodule Defused.Module do
+  @moduledoc """
+  Use `Defused.Module` in a module to defuse all or some of the def:s
+
+  ## Examples
+
+      defmodule Module do
+        use Defused.Module, fuse: :fuse_name, only: [foo: 2]
+
+        def foo(a, b) do
+          # defused
+        end
+        def bar() do
+          # not defused
+        end
+      end
+
+  ## Options
+
+    * `:fuse` - required, the name of the fuse
+    * `:only` - the defs that should be defused
+    * `:except` - the defs that should not be defused
+
+    Only one of `:only` and `:except` can be used.
+
+  """
+
+  @doc false
   defmacro __using__(opts) do
     quote do
       fuse = Keyword.fetch!(unquote(opts), :fuse)
