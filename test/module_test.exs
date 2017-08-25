@@ -2,7 +2,10 @@ defmodule Defused.ModuleTest do
   use ExUnit.Case
   @fuse :defused_module_fuse
 
-  defmodule Test do
+  defmodule DefusedTest do
+    @fuse :defused_module_fuse
+    use Defused.Module, fuse: @fuse
+
     def foo(_a, _b) do
       {:ok, :hello}
     end
@@ -12,24 +15,17 @@ defmodule Defused.ModuleTest do
     end
   end
 
-  defmodule DefusedTest do
-    @fuse :defused_module_fuse
-    use Defused.Module, target: Test, fuse: @fuse
-  end
-
-  defmodule DefusedTestOnly do
-    @fuse :defused_module_fuse
-    use Defused.Module, target: Test, fuse: @fuse, only: [foo: 2]
-  end
-
-  defmodule DefusedTestExcept do
-    @fuse :defused_module_fuse
-    use Defused.Module, target: Test, fuse: @fuse, except: [foo: 2]
-  end
-
   defmodule DefusedTestError do
     @fuse :defused_module_fuse
-    use Defused.Module, target: Test, fuse: @fuse
+    use Defused.Module, fuse: @fuse
+
+    def foo(_a, _b) do
+      {:ok, :hello}
+    end
+
+    def bar do
+      {:error, :broken}
+    end
 
     def blown_error(fuse, call) do
       {:error, fuse, call}
@@ -50,17 +46,65 @@ defmodule Defused.ModuleTest do
   end
 
   test "erroring functions" do
+    :ok = :fuse.circuit_enable(@fuse)
     assert DefusedTest.bar() == {:error, :broken}
     :ok = :fuse.circuit_disable(@fuse)
     assert DefusedTest.bar() == {:error, :unavailable}
   end
 
+  defmodule DefusedTestOnly do
+    @fuse :defused_module_fuse
+    use Defused.Module, fuse: @fuse, only: [foo: 2]
+
+    def foo(_a, _b) do
+      {:ok, :hello}
+    end
+
+    def bar do
+      :ok
+    end
+  end
+
+  test "only gets the correct arity" do
+    assert funcs(DefusedTestOnly) == [bar: 0, foo: 2]
+  end
+
   test "only is respected" do
-    assert funcs(DefusedTestOnly) == [foo: 2]
+    :ok = :fuse.circuit_disable(@fuse)
+    assert DefusedTestOnly.bar == :ok
+    assert DefusedTestOnly.foo(1, 2) == {:error, :unavailable}
+  end
+
+  defmodule DefusedTestExcept do
+    @fuse :defused_module_fuse
+
+    use Defused.Module, fuse: @fuse, except: [foo: 2]
+
+    def foo(a, _b) when a < 2 do
+      {:ok, :hello}
+    end
+
+    def foo(a, _b) when a < 2 and a > 0 do
+      {:ok, :hello}
+    end
+
+    def foo(_a, _b) do
+      {:ok, :hello}
+    end
+
+    def bar do
+      {:error, :broken}
+    end
+  end
+
+  test "except gets the correct arity" do
+    assert funcs(DefusedTestExcept) == [bar: 0, foo: 2]
   end
 
   test "except is respected" do
-    assert funcs(DefusedTestExcept) == [bar: 0]
+    :ok = :fuse.circuit_disable(@fuse)
+    assert DefusedTestExcept.foo(1,2) == {:ok, :hello}
+    assert DefusedTestExcept.bar() == {:error, :unavailable}
   end
 
   test "can override blown error" do
