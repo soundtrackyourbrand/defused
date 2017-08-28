@@ -65,6 +65,7 @@ defmodule Defused.Module do
     end
   end
 
+  @doc false
   defmacro def(call, expr \\ nil) do
     quote do
       {name, arity} = unquote(meta(call))
