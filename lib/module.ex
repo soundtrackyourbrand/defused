@@ -1,6 +1,6 @@
 defmodule Defused.Module do
   @moduledoc """
-  Use `Defused.Module` in a module to defuse all or some of the def:s
+  Use `Defused.Module` in a module to defuse all or some of its def:s
 
   ## Examples
 
