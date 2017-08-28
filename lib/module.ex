@@ -21,7 +21,7 @@ defmodule Defused.Module do
     * `:only` - the defs that should be defused
     * `:except` - the defs that should not be defused
 
-    Only one of `:only` and `:except` can be used.
+    Only one of `:only` and `:except` can be used. If none of them are specified, all def:s will be defused
 
   """
 
