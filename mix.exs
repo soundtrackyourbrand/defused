@@ -22,8 +22,8 @@ defmodule Defused.Mixfile do
 
   defp deps do
     [{:fuse, "~> 2.4"},
-     {:ex_doc, "~> 0.16", only: :docs},
-     {:inch_ex, ">= 0.0.0", only: :docs}]
+     {:ex_doc, "~> 0.16", only: [:docs, :dev]},
+     {:inch_ex, ">= 0.0.0", only: [:docs, :dev]}]
   end
 
   defp package do
