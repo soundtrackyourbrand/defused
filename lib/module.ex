@@ -50,6 +50,7 @@ defmodule Defused.Module do
 
       @defused_only only
       @defused_except except
+      @defused_fuse fuse
     end
   end
 
@@ -75,14 +76,14 @@ defmodule Defused.Module do
         @defused_only != nil ->
           case MapSet.member?(@defused_only, {name, arity}) do
             false -> Kernel.def(unquote(call), unquote(expr))
-            true -> defused @fuse, unquote(call), unquote(expr)
+            true -> defused @defused_fuse, unquote(call), unquote(expr)
           end
         @defused_except != nil ->
           case MapSet.member?(@defused_except, {name, arity}) do
             true -> Kernel.def(unquote(call), unquote(expr))
-            false -> defused @fuse, unquote(call), unquote(expr)
+            false -> defused @defused_fuse, unquote(call), unquote(expr)
           end
-        true -> defused @fuse, unquote(call), unquote(expr)
+        true -> defused @defused_fuse, unquote(call), unquote(expr)
       end
     end
   end
