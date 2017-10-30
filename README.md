@@ -30,7 +30,7 @@ Add `defused` to you dependencies
 
 ```elixir
 def deps do
-  [{:defused, "~> 0.1.0"}]
+  [{:defused, "~> 0.6.0"}]
 end
 ```
 
