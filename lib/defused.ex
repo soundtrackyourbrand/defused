@@ -35,6 +35,32 @@ defmodule Defused do
   end
 
   @doc """
+  Runs the provided do block only if the fuse haven't been blown.
+
+  ## Examples
+    def func() do
+      fused :fuse, do
+        :ok
+      end
+    end
+  """
+  defmacro fused(fuse, do: block) do
+    quote do
+      case :fuse.ask(unquote(fuse), :sync) do
+        :ok ->
+          case unquote(block) do
+            :ok -> :ok
+            {:ok, _} = res -> res
+            err ->
+              :fuse.melt(unquote(fuse))
+              err
+          end
+        :blown -> blown_error(unquote(fuse), [__ENV__.function])
+      end
+    end
+  end
+
+  @doc """
   Defines a fused function with the given fuse name, function name
   and body.
 
@@ -57,16 +83,7 @@ defmodule Defused do
   defmacro defused(fuse, call, do: block) do
     quote do
       def unquote(call) do
-        case :fuse.ask(unquote(fuse), :sync) do
-          :ok -> case unquote(block) do
-                   :ok -> :ok
-                   {:ok, _} = res -> res
-                   err ->
-                     :fuse.melt(unquote(fuse))
-                     err
-                 end
-          :blown -> blown_error(unquote(fuse), [__ENV__.function])
-        end
+        Defused.fused(unquote(fuse), do: unquote(block))
       end
     end
   end
